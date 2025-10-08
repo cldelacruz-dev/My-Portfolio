@@ -16,127 +16,111 @@ const ERR = {
     "The request to Medium didn't succeed. Check if Medium username in your .env file is correct."
 };
 
-// --- GitHub Fetch ---
-if (USE_GITHUB_DATA === "true") {
+// Helper to fetch HTTPS JSON data
+function fetchHttpsJson(options, postData = null) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let data = "";
+
+      console.log(`statusCode: ${res.statusCode}`);
+
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => {
+        if (res.statusCode === 200) resolve(data);
+        else reject(new Error(`Request failed with status ${res.statusCode}`));
+      });
+    });
+
+    req.on("error", reject);
+
+    if (postData) req.write(postData);
+    req.end();
+  });
+}
+
+async function fetchGitHub() {
+  if (USE_GITHUB_DATA !== "true") return;
+
   if (!GITHUB_USERNAME) {
-    throw new Error(ERR.noUserName);
+    console.error(ERR.noUserName);
+    return;
   }
 
   console.log(`Fetching profile data for ${GITHUB_USERNAME}`);
 
-  const queryData = JSON.stringify({
-    query: `
-      {
-        user(login:"${GITHUB_USERNAME}") { 
-          name
-          bio
-          avatarUrl
-          location
-          pinnedItems(first: 6, types: [REPOSITORY]) {
-            totalCount
-            edges {
+  const postData = JSON.stringify({
+    query: `{
+      user(login:"${GITHUB_USERNAME}") { 
+        name
+        bio
+        avatarUrl
+        location
+        pinnedItems(first: 6, types: [REPOSITORY]) {
+          totalCount
+          edges {
               node {
                 ... on Repository {
                   name
                   description
                   forkCount
-                  stargazers {
-                    totalCount
-                  }
+                  stargazers { totalCount }
                   url
                   id
                   diskUsage
-                  primaryLanguage {
-                    name
-                    color
-                  }
+                  primaryLanguage { name color }
                 }
               }
             }
           }
         }
-      }
-    `
+    }`
   });
 
-  const githubOptions = {
+  const options = {
     hostname: "api.github.com",
     path: "/graphql",
     port: 443,
     method: "POST",
     headers: {
       Authorization: `Bearer ${GITHUB_TOKEN}`,
-      "User-Agent": "Node"
+      "User-Agent": "Node",
+      "Content-Type": "application/json"
     }
   };
 
-  const githubReq = https.request(githubOptions, res => {
-    let data = "";
-
-    console.log(`statusCode: ${res.statusCode}`);
-    if (res.statusCode !== 200) {
-      throw new Error(ERR.requestFailed);
-    }
-
-    res.on("data", chunk => {
-      data += chunk;
-    });
-
-    res.on("end", () => {
-      fs.writeFile("./public/profile.json", data, err => {
-        if (err) return console.log(err);
-        console.log("Saved file to public/profile.json");
-      });
-    });
-  });
-
-  githubReq.on("error", error => {
-    console.error("GitHub request error:", error.message);
-  });
-
-  githubReq.write(queryData);
-  githubReq.end();
-}
-
-// --- Medium Fetch (Safe) ---
-if (MEDIUM_USERNAME) {
   try {
-    console.log(`Fetching Medium blogs data for ${MEDIUM_USERNAME}`);
-    const options = {
-      hostname: "api.rss2json.com",
-      path: `/v1/api.json?rss_url=https://medium.com/feed/@${MEDIUM_USERNAME}`,
-      port: 443,
-      method: "GET"
-    };
-
-    const req = https.request(options, res => {
-      let mediumData = "";
-
-      console.log(`statusCode: ${res.statusCode}`);
-
-      res.on("data", chunk => {
-        mediumData += chunk;
-      });
-
-      res.on("end", () => {
-        if (res.statusCode !== 200) {
-          console.warn(ERR.requestFailedMedium, `(status: ${res.statusCode})`);
-          return;
-        }
-
-        fs.writeFile("./public/blogs.json", mediumData, err => {
-          if (err) return console.log(err);
-          console.log("Saved file to public/blogs.json");
-        });
-      });
-    });
-
-    req.on("error", error => {
-      console.warn("Medium request error:", error.message);
-    });
-
-    req.end();
+    const data = await fetchHttpsJson(options, postData);
+    fs.writeFileSync("./public/profile.json", data);
+    console.log("Saved GitHub profile to public/profile.json");
   } catch (err) {
-    console.warn("Skipping Medium fetch due to error:", err.message);
+    console.error("GitHub fetch failed:", err.message);
   }
 }
+
+async function fetchMedium() {
+  if (!MEDIUM_USERNAME) return;
+
+  console.log(`Fetching Medium blogs data for ${MEDIUM_USERNAME}`);
+
+  const options = {
+    hostname: "api.rss2json.com",
+    path: `/v1/api.json?rss_url=https://medium.com/feed/@${MEDIUM_USERNAME}`,
+    port: 443,
+    method: "GET"
+  };
+
+  try {
+    const data = await fetchHttpsJson(options);
+    fs.writeFileSync("./public/blogs.json", data);
+    console.log("Saved Medium blogs to public/blogs.json");
+  } catch (err) {
+    console.warn("Medium fetch failed:", err.message);
+  }
+}
+
+// Run both fetches
+(async function main() {
+  await fetchGitHub();
+  await fetchMedium();
+  console.log("Fetch complete.");
+})();
