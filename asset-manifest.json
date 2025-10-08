@@ -1,11 +1,11 @@
 {
   "files": {
     "main.css": "/static/css/main.52509c9d.css",
-    "main.js": "/static/js/main.de26c018.js",
+    "main.js": "/static/js/main.756b922d.js",
     "static/css/487.bb36206c.chunk.css": "/static/css/487.bb36206c.chunk.css",
-    "static/js/487.b3617841.chunk.js": "/static/js/487.b3617841.chunk.js",
+    "static/js/487.8c4b2edc.chunk.js": "/static/js/487.8c4b2edc.chunk.js",
     "static/css/990.c6a7ee28.chunk.css": "/static/css/990.c6a7ee28.chunk.css",
-    "static/js/990.ac20302a.chunk.js": "/static/js/990.ac20302a.chunk.js",
+    "static/js/990.75e91bd6.chunk.js": "/static/js/990.75e91bd6.chunk.js",
     "static/media/feuTechLogo.png": "/static/media/feuTechLogo.78c895b786b48c7a5698.png",
     "static/media/Montserrat-Regular.ttf": "/static/media/Montserrat-Regular.3cd786652b8a2e9d41f2.ttf",
     "static/media/rgtcLogo.png": "/static/media/rgtcLogo.3277f50c4e53bd5e91d6.png",
@@ -22,14 +22,14 @@
     "index.html": "/index.html",
     "static/media/talksCardBack.svg": "/static/media/talksCardBack.73ed1545d58273ba64b0.svg",
     "main.52509c9d.css.map": "/static/css/main.52509c9d.css.map",
-    "main.de26c018.js.map": "/static/js/main.de26c018.js.map",
+    "main.756b922d.js.map": "/static/js/main.756b922d.js.map",
     "487.bb36206c.chunk.css.map": "/static/css/487.bb36206c.chunk.css.map",
-    "487.b3617841.chunk.js.map": "/static/js/487.b3617841.chunk.js.map",
+    "487.8c4b2edc.chunk.js.map": "/static/js/487.8c4b2edc.chunk.js.map",
     "990.c6a7ee28.chunk.css.map": "/static/css/990.c6a7ee28.chunk.css.map",
-    "990.ac20302a.chunk.js.map": "/static/js/990.ac20302a.chunk.js.map"
+    "990.75e91bd6.chunk.js.map": "/static/js/990.75e91bd6.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.52509c9d.css",
-    "static/js/main.de26c018.js"
+    "static/js/main.756b922d.js"
   ]
 }
